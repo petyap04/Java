@@ -1,4 +1,5 @@
 public class TextJustifier {
+    
     public static int[] arrayWithCountOfLines(String[] words, int maxWidth){
         int currInd=0;
         int count=1;
@@ -16,6 +17,7 @@ public class TextJustifier {
         }
         return countOfWordInEveryLine;
     }
+    
     public static int countOfLines(int[] arr){
         int count=0;
         for(int i = 0;i < arr.length;i++){
@@ -26,10 +28,10 @@ public class TextJustifier {
         }
         return count;
     }
+    
     public static String putWordsInLine(String[] words, int maxWidth, int countOfWords, int startIdx, boolean isLastLine) {
         StringBuilder line = new StringBuilder();
         int totalChars = 0;
-
         for (int i = 0; i < countOfWords; i++) {
             totalChars += words[startIdx + i].length();
         }
@@ -60,6 +62,7 @@ public class TextJustifier {
 
         return line.toString();
     }
+    
     public static String[] justifyText(String[] words, int maxWidth){
         int[] arr = arrayWithCountOfLines(words,maxWidth);
         int countOfLines = countOfLines(arr);
@@ -72,6 +75,7 @@ public class TextJustifier {
         }
         return returnStr;
     }
+    
     public static void main(String[] args) {
         String[] str = {"Science", "is", "what", "we", "understand", "well", "enough", "to", "explain", "to", "a", "computer."};
         String[] str1 = justifyText(str,20);
