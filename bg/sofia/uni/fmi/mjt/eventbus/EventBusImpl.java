@@ -26,21 +26,14 @@ public class EventBusImpl implements EventBus {
 
     @Override
     public <T extends Event<?>> void subscribe(Class<T> eventType, Subscriber<? super T> subscriber) {
-        if (eventType == null) {
+        if (eventType == null || subscriber == null) {
             throw new IllegalArgumentException();
         }
-
-        if (subscriber == null) {
-            throw new IllegalArgumentException();
-        }
-
         Collection<Subscriber<?>> currSubscribers = subscribers.get(eventType);
-
         if (currSubscribers == null) {
             currSubscribers = new HashSet<>();
             subscribers.put(eventType, currSubscribers);
         }
-
         currSubscribers.add(subscriber);
         currSubscribers.add(subscriber);
     }
@@ -48,20 +41,13 @@ public class EventBusImpl implements EventBus {
     @Override
     public <T extends Event<?>> void unsubscribe(Class<T> eventType, Subscriber<? super T> subscriber)
             throws MissingSubscriptionException {
-        if (eventType == null) {
+        if (eventType == null || subscriber == null) {
             throw new IllegalArgumentException();
         }
-
-        if (subscriber == null) {
-            throw new IllegalArgumentException();
-        }
-
         Collection<Subscriber<?>> currSubscribers = subscribers.get(eventType);
-
         if (currSubscribers == null || !currSubscribers.remove(subscriber)) {
             throw new MissingSubscriptionException();
         }
-
         if (currSubscribers.isEmpty()) {
             subscribers.remove(eventType);
         }
@@ -72,9 +58,7 @@ public class EventBusImpl implements EventBus {
         if (event == null) {
             throw new IllegalArgumentException();
         }
-
         Collection<Subscriber<?>> subscribersForEvent = subscribers.get(event.getClass());
-
         if (subscribersForEvent != null) {
             for (Subscriber<?> currentSubscriber : subscribersForEvent) {
                 @SuppressWarnings("unchecked")
@@ -95,31 +79,19 @@ public class EventBusImpl implements EventBus {
     @SuppressWarnings("checkstyle:LineLength")
     @Override
     public Collection<? extends Event<?>> getEventLogs(Class<? extends Event<?>> eventType, Instant from, Instant to) {
-        if (eventType == null) {
+        if (eventType == null || from == null || to == null) {
             throw new IllegalArgumentException();
         }
-
-        if (from == null) {
-            throw new IllegalArgumentException();
-        }
-
-        if (to == null) {
-            throw new IllegalArgumentException();
-        }
-
         if (events == null) {
             return Collections.emptyList();
         }
-
         List<Event<?>> filteredEvents = new ArrayList<>();
-
         for (Event<?> event : events) {
             if (eventType.isInstance(event) &&
                     !event.getTimestamp().isBefore(from) && event.getTimestamp().isBefore(to)) {
                 filteredEvents.add(event);
             }
         }
-
         filteredEvents.sort(Comparator.comparing(Event::getTimestamp));
         return Collections.unmodifiableCollection(filteredEvents);
     }
@@ -129,12 +101,10 @@ public class EventBusImpl implements EventBus {
         if (eventType == null) {
             throw new IllegalArgumentException("");
         }
-
         Collection<Subscriber<?>> currSubscribers = subscribers.get(eventType);
         if (currSubscribers == null) {
             return Collections.emptyList();
         }
-
         return Collections.unmodifiableCollection(currSubscribers);
     }
 }
