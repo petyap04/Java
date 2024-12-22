@@ -25,6 +25,6 @@ public class GenresOverlapSimilarityCalculator implements SimilarityCalculator {
             }
         }
         return (double) Math.abs(intersection) /
-                Math.min(first.genres().size(), second.genres().size());
+            Math.min(first.genres().size(), second.genres().size());
     }
 }

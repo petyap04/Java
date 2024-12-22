@@ -22,9 +22,9 @@ public class TextTokenizer {
 
     public List<String> tokenize(String input) {
         String cleanedInput = input
-                .replaceAll("\\p{Punct}", "")
-                .replaceAll("\\s+", " ")
-                .toLowerCase();
+            .replaceAll("\\p{Punct}", "")
+            .replaceAll("\\s+", " ")
+            .toLowerCase();
 
         String[] words = cleanedInput.split("\\s+");
         List<String> result = new ArrayList<>();

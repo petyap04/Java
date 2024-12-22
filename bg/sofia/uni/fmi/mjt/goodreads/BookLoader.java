@@ -22,7 +22,5 @@ public class BookLoader {
         } catch (IOException | CsvException ex) {
             throw new IllegalArgumentException("Could not load dataset", ex);
         }
-
     }
-
 }

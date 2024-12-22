@@ -8,6 +8,7 @@ import java.util.Map;
 public class CompositeSimilarityCalculator implements SimilarityCalculator {
 
     private final Map<SimilarityCalculator, Double> similarityCalculatorMap;
+
     public CompositeSimilarityCalculator(Map<SimilarityCalculator, Double> similarityCalculatorMap) {
         if (similarityCalculatorMap == null) {
             throw new IllegalArgumentException("SimilarityCalculatorMap can't be null!");

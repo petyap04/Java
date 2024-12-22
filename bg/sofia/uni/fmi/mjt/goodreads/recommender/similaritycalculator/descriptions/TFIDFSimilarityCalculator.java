@@ -101,14 +101,14 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
         commonKeys.retainAll(second.keySet());
 
         return commonKeys.stream()
-                .mapToDouble(word -> first.get(word) * second.get(word))
-                .sum();
+            .mapToDouble(word -> first.get(word) * second.get(word))
+            .sum();
     }
 
     private double magnitude(Collection<Double> input) {
         double squaredMagnitude = input.stream()
-                .map(v -> v * v)
-                .reduce(0.0, Double::sum);
+            .map(v -> v * v)
+            .reduce(0.0, Double::sum);
 
         return Math.sqrt(squaredMagnitude);
     }
