@@ -3,8 +3,11 @@ package bg.sofia.uni.fmi.mjt.goodreads.recommender;
 import bg.sofia.uni.fmi.mjt.goodreads.book.Book;
 import bg.sofia.uni.fmi.mjt.goodreads.recommender.similaritycalculator.SimilarityCalculator;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class BookRecommender implements BookRecommenderAPI {
 
@@ -37,6 +40,8 @@ public class BookRecommender implements BookRecommenderAPI {
         if (maxN <= 0) {
             throw new IllegalArgumentException("The number has to be bigger than 0");
         }
+        SortedMap<Book, Double> result = new TreeMap<>();
+        for ()
     }
 
 }

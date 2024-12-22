@@ -17,7 +17,14 @@ public class CompositeSimilarityCalculator implements SimilarityCalculator {
 
     @Override
     public double calculateSimilarity(Book first, Book second) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (first == null || second == null) {
+            throw new IllegalArgumentException("The books can't be null!");
+        }
+        double result = 0.0;
+        for (SimilarityCalculator curr : similarityCalculatorMap.keySet()) {
+            result += curr.calculateSimilarity(first, second) * similarityCalculatorMap.get(curr);
+        }
+        return result;
     }
 
 }
