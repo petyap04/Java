@@ -22,16 +22,6 @@ public class BookRecommender implements BookRecommenderAPI {
         this.calculator = calculator;
     }
 
-    /**
-     * Searches for books that are similar to the provided one.
-     *
-     * @param origin the book we should calculate similarity with.
-     * @param maxN       the maximum number of entries returned
-     * @return a SortedMap<Book, Double> representing the top maxN closest books
-     * with their similarity to originBook ordered by their similarity score
-     * @throws IllegalArgumentException if the originBook is null.
-     * @throws IllegalArgumentException if maxN is smaller or equal to 0.
-     */
     @Override
     public SortedMap<Book, Double> recommendBooks(Book origin, int maxN) {
         if (origin == null) {
@@ -40,8 +30,35 @@ public class BookRecommender implements BookRecommenderAPI {
         if (maxN <= 0) {
             throw new IllegalArgumentException("The number has to be bigger than 0");
         }
-        SortedMap<Book, Double> result = new TreeMap<>();
-        for ()
+
+        Map<Book, Double> similarityMap = new HashMap<>();
+
+        for (Book book : initialBooks) {
+            if (!book.equals(origin)) {
+                double similarity = calculator.calculateSimilarity(origin, book);
+                similarityMap.put(book, similarity);
+            }
+        }
+        SortedMap<Book, Double> sortedResults = new TreeMap<>(
+                (book1, book2) -> {
+                    int compare = Double.compare(similarityMap.get(book2), similarityMap.get(book1));
+                    return compare != 0 ? compare : book1.title().compareTo(book2.title());
+                }
+        );
+
+        sortedResults.putAll(similarityMap);
+        SortedMap<Book, Double> topResults = new TreeMap<>(sortedResults);
+        int count = 0;
+        SortedMap<Book, Double> finalResults = new TreeMap<>(sortedResults.comparator());
+        for (Map.Entry<Book, Double> entry : topResults.entrySet()) {
+            if (count >= maxN) {
+                break;
+            }
+            finalResults.put(entry.getKey(), entry.getValue());
+            count++;
+        }
+
+        return finalResults;
     }
 
 }
