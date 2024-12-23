@@ -23,9 +23,6 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
         this.tokenizer = tokenizer;
     }
 
-    /*
-     * Do not modify!
-     */
     @Override
     public double calculateSimilarity(Book first, Book second) {
         Map<String, Double> tfIdfScoresFirst = computeTFIDF(first);

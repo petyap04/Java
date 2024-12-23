@@ -22,7 +22,7 @@ public class BookRecommender implements BookRecommenderAPI {
         this.calculator = calculator;
     }
 
-    private Map<Book, Double> calculateSimilarityMap(Book origin) {
+    Map<Book, Double> calculateSimilarityMap(Book origin) {
         Map<Book, Double> similarityMap = new HashMap<>();
         for (Book book : initialBooks) {
             if (!book.equals(origin)) {
