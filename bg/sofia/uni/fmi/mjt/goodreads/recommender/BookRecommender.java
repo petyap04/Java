@@ -34,12 +34,10 @@ public class BookRecommender implements BookRecommenderAPI {
     }
 
     private SortedMap<Book, Double> getTopRecommendations(Map<Book, Double> similarityMap, int maxN) {
-        SortedMap<Book, Double> sortedResults = new TreeMap<>(
-            (book1, book2) -> {
-                int compare = Double.compare(similarityMap.get(book2), similarityMap.get(book1));
-                return compare != 0 ? compare : book1.title().compareTo(book2.title());
-            }
-        );
+        SortedMap<Book, Double> sortedResults = new TreeMap<>((book1, book2) -> {
+            int compare = Double.compare(similarityMap.get(book2), similarityMap.get(book1));
+            return compare != 0 ? compare : book1.title().compareTo(book2.title());
+        });
         sortedResults.putAll(similarityMap);
         SortedMap<Book, Double> finalResults = new TreeMap<>(sortedResults.comparator());
         int count = 0;

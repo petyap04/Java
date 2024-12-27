@@ -15,9 +15,9 @@ public class BookLoader {
 
         try (CSVReader csvReader = new CSVReader(reader)) {
             return csvReader.readAll().stream()
-                    .skip(1)
-                    .map(Book::of)
-                    .collect(Collectors.toSet());
+                .skip(1)
+                .map(Book::of)
+                .collect(Collectors.toSet());
 
         } catch (IOException | CsvException ex) {
             throw new IllegalArgumentException("Could not load dataset", ex);

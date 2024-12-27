@@ -5,16 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public record Book(
-    String ID,
-    String title,
-    String author,
-    String description,
-    List<String> genres,
-    double rating,
-    int ratingCount,
-    String URL
-) {
+public record Book(String ID, String title, String author, String description, List<String> genres, double rating,
+                   int ratingCount, String URL) {
     private static final String GENRES_LIST_START = "[";
     private static final String GENRES_LIST_END = "]";
     private static final String GENRE_CONTENT_MARKER = "'";

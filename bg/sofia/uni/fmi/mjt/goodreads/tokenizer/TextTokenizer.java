@@ -15,12 +15,16 @@ public class TextTokenizer {
     public TextTokenizer(Reader stopwordsReader) {
         try (var br = new BufferedReader(stopwordsReader)) {
             stopwords = br.lines().collect(Collectors.toSet());
+            stopwords.add("");
         } catch (IOException ex) {
             throw new IllegalArgumentException("Could not load dataset", ex);
         }
     }
 
     public List<String> tokenize(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input can't be null!");
+        }
         String cleanedInput = input
             .replaceAll("\\p{Punct}", "")
             .replaceAll("\\s+", " ")

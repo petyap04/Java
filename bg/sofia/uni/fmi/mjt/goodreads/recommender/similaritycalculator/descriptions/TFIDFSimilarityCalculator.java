@@ -86,7 +86,7 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
         return idfScores;
     }
 
-    private double cosineSimilarity(Map<String, Double> first, Map<String, Double> second) {
+    double cosineSimilarity(Map<String, Double> first, Map<String, Double> second) {
         double magnitudeFirst = magnitude(first.values());
         double magnitudeSecond = magnitude(second.values());
 
@@ -97,15 +97,11 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
         Set<String> commonKeys = new HashSet<>(first.keySet());
         commonKeys.retainAll(second.keySet());
 
-        return commonKeys.stream()
-            .mapToDouble(word -> first.get(word) * second.get(word))
-            .sum();
+        return commonKeys.stream().mapToDouble(word -> first.get(word) * second.get(word)).sum();
     }
 
     private double magnitude(Collection<Double> input) {
-        double squaredMagnitude = input.stream()
-            .map(v -> v * v)
-            .reduce(0.0, Double::sum);
+        double squaredMagnitude = input.stream().map(v -> v * v).reduce(0.0, Double::sum);
 
         return Math.sqrt(squaredMagnitude);
     }
