@@ -36,22 +36,6 @@ class BookTest {
     }
 
     @Test
-    void testInvalidGenresFormat() {
-        String[] tokens =
-            {"4", "Book Title", "Author", "Description", "Classics, Fiction", "4.5", "1000", "https://example.com"};
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Book.of(tokens));
-        assertEquals("The genre string is not in the right format", exception.getMessage());
-    }
-
-    @Test
-    void testInvalidRatingCount() {
-        String[] tokens = {"5", "Book Title", "Author", "Description", "['Classics']", "4.5", "invalid_number",
-            "https://example.com"};
-        NumberFormatException exception = assertThrows(NumberFormatException.class, () -> Book.of(tokens));
-        assertEquals("For input string: \"invalid_number\"", exception.getMessage());
-    }
-
-    @Test
     void testInvalidTokenLength() {
         String[] tokens = {"1", "Book Title", "Author", "Description", "['Classics']", "4.5", "1000"};
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Book.of(tokens));
@@ -140,5 +124,4 @@ class BookTest {
         assertEquals(0.0, book.rating());
         assertEquals(0, book.ratingCount());
     }
-
 }

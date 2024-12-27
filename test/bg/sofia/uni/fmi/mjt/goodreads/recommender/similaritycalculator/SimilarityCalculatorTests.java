@@ -32,10 +32,7 @@ class SimilarityCalculatorTests {
 
     @BeforeEach
     void setUp() {
-        book1 = new Book(
-            "0",
-            "To Kill a Mockingbird",
-            "Harper Lee",
+        book1 = new Book("0", "To Kill a Mockingbird", "Harper Lee",
             "The unforgettable novel of a childhood in a sleepy Southern town and the crisis of conscience " +
                 "that rocked it. To Kill A Mockingbird became both an instant bestseller and a critical success when it " +
                 "was first published in 1960. It went on to win the Pulitzer Prize in 1961 and was later made into" +
@@ -46,28 +43,16 @@ class SimilarityCalculatorTests {
                 "appeal. Harper Lee always considered her book to be a simple love story. " +
                 "Today it is regarded as a masterpiece of American literature.",
             List.of("Classics", "Fiction", "Historical Fiction", "School", "Literature", "Young Adult", "Historical"),
-            4.27,
-            5691311,
-            "https://www.goodreads.com/book/show/2657.To_Kill_a_Mockingbird"
-        );
+            4.27, 5691311, "https://www.goodreads.com/book/show/2657.To_Kill_a_Mockingbird");
 
-        book2 = new Book(
-            "1",
-            "Harry Potter and the Philosopher’s Stone",
-            "J.K. Rowling",
+        book2 = new Book("1", "Harry Potter and the Philosopher’s Stone", "J.K. Rowling",
             "Harry Potter thinks he is an ordinary boy - until he is rescued by an owl, " +
                 "taken to Hogwarts School of Witchcraft and Wizardry, learns to play Quidditch and does battle" +
                 " in a deadly duel. The Reason ... HARRY POTTER IS A WIZARD!",
-            List.of("Fantasy", "Fiction", "Young Adult", "Magic", "Childrens", "Middle Grade", "Classics"),
-            4.47,
-            9278135,
-            "https://www.goodreads.com/book/show/72193.Harry_Potter_and_the_Philosopher_s_Stone"
-        );
+            List.of("Fantasy", "Fiction", "Young Adult", "Magic", "Childrens", "Middle Grade", "Classics"), 4.47,
+            9278135, "https://www.goodreads.com/book/show/72193.Harry_Potter_and_the_Philosopher_s_Stone");
 
-        book3 = new Book(
-            "2",
-            "Pride and Prejudice",
-            "Jane Austen",
+        book3 = new Book("2", "Pride and Prejudice", "Jane Austen",
             "Since its immediate success in 1813, Pride and Prejudice has remained one of the most popular" +
                 " novels in the English language. Jane Austen called this brilliant work her own darling child and" +
                 " its vivacious heroine, Elizabeth Bennet, as delightful a creature as ever appeared in print. " +
@@ -76,10 +61,7 @@ class SimilarityCalculatorTests {
                 " dance a delicate quadrille of flirtation and intrigue, making this book the most superb comedy" +
                 " of manners of Regency England.",
             List.of("Classics", "Fiction", "Romance", "Historical Fiction", "Literature", "Historical", "Audiobook"),
-            4.28,
-            3944155,
-            "https://www.goodreads.com/book/show/1885.Pride_and_Prejudice"
-        );
+            4.28, 3944155, "https://www.goodreads.com/book/show/1885.Pride_and_Prejudice");
 
         genresCalculator = new GenresOverlapSimilarityCalculator();
 
@@ -89,10 +71,7 @@ class SimilarityCalculatorTests {
         Set<Book> books = Set.of(book1, book2, book3);
         tfidfCalculator = new TFIDFSimilarityCalculator(books, mockTokenizer);
 
-        Map<SimilarityCalculator, Double> calculatorMap = Map.of(
-            genresCalculator, 0.5,
-            tfidfCalculator, 0.5
-        );
+        Map<SimilarityCalculator, Double> calculatorMap = Map.of(genresCalculator, 0.5, tfidfCalculator, 0.5);
 
         compositeCalculator = new CompositeSimilarityCalculator(calculatorMap);
     }
