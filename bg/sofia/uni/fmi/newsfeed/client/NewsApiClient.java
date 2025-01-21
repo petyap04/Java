@@ -9,12 +9,13 @@ import bg.sofia.uni.fmi.newsfeed.model.NewsResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import bg.sofia.uni.fmi.newsfeed.exception.NewsApiException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
 public class NewsApiClient {
@@ -29,33 +30,42 @@ public class NewsApiClient {
 
     private final NewsApiConfig config;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient;
 
     public NewsApiClient(NewsApiConfig config) {
         this.config = config;
+        this.httpClient =
+            HttpClient.newBuilder().connectTimeout(Duration.ofMillis(config.connectTimeoutMillis())).build();
+    }
+
+    public NewsApiClient(NewsApiConfig config, HttpClient httpClient) {
+        this.config = config;
+        this.httpClient = httpClient;
     }
 
     public NewsResponse getTopHeadlines(RequestBuilder builder) throws NewsApiException, TimeoutException {
         validateKeywords(builder.getKeywords());
         String fullUrl = buildUrl(builder);
-        HttpURLConnection connection = null;
+
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(fullUrl)).GET()
+            .timeout(Duration.ofMillis(config.readTimeoutMillis())).build();
+
         try {
-            connection = createConnection(fullUrl);
-            int responseCode = connection.getResponseCode();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            int responseCode = response.statusCode();
 
             if (isSuccess(responseCode)) {
-                return readSuccessResponse(connection);
+                return objectMapper.readValue(response.body(), NewsResponse.class);
             } else {
-                handleErrorResponse(connection, responseCode);
+                handleErrorResponse(responseCode, response.body());
             }
-        } catch (SocketTimeoutException e) {
-            throw new TimeoutException();
-        } catch (IOException e) {
-            throw new NewsApiException("I/O error connecting to News API", e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        } catch (HttpTimeoutException e) {
+            throw new TimeoutException("Request timed out");
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new NewsApiException("Error connecting to News API", e);
         }
+
         throw new NewsApiException("Unhandled case occurred while processing the API response.");
     }
 
@@ -90,51 +100,21 @@ public class NewsApiClient {
         }
     }
 
-    protected HttpURLConnection createConnection(String fullUrl) throws IOException {
-        URL url = new URL(fullUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setConnectTimeout(config.connectTimeoutMillis());
-        connection.setReadTimeout(config.readTimeoutMillis());
-        connection.setRequestMethod("GET");
-        return connection;
-    }
-
     private boolean isSuccess(int code) {
         return code >= OK_START && code <= OK_END;
     }
 
-    private NewsResponse readSuccessResponse(HttpURLConnection connection) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            return objectMapper.readValue(reader, NewsResponse.class);
-        }
-    }
-
-    private void handleErrorResponse(HttpURLConnection connection, int responseCode) throws NewsApiException {
-        String errorMsg = readErrorStream(connection);
-
+    private void handleErrorResponse(int responseCode, String errorBody) throws NewsApiException {
         if (responseCode == BAD_REQUEST) {
-            throw new BadRequestException(errorMsg);
+            throw new BadRequestException(errorBody);
         } else if (responseCode == UNAUTHORIZED) {
-            throw new UnauthorizedException(errorMsg);
+            throw new UnauthorizedException(errorBody);
         } else if (responseCode == TOO_MANY_REQUESTS) {
-            throw new TooManyRequestsException(errorMsg);
+            throw new TooManyRequestsException(errorBody);
         } else if (responseCode >= SERVER_ERROR_START && responseCode <= SERVER_ERROR_END) {
-            throw new ServerErrorException(errorMsg);
+            throw new ServerErrorException(errorBody);
         } else {
-            throw new NewsApiException("Unknown error (status " + responseCode + "): " + errorMsg);
-        }
-    }
-
-    private String readErrorStream(HttpURLConnection connection) throws NewsApiException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
-            StringBuilder errorMsg = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                errorMsg.append(line);
-            }
-            return errorMsg.toString();
-        } catch (IOException e) {
-            throw new NewsApiException("Error reading error response stream", e);
+            throw new NewsApiException("Unknown error (status " + responseCode + "): " + errorBody);
         }
     }
 }
