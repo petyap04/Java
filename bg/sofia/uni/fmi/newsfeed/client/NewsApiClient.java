@@ -16,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 public class NewsApiClient {
@@ -31,42 +32,84 @@ public class NewsApiClient {
     private final NewsApiConfig config;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
+    private final RequestCache requestCache;
 
     public NewsApiClient(NewsApiConfig config) {
-        this.config = config;
-        this.httpClient =
-            HttpClient.newBuilder().connectTimeout(Duration.ofMillis(config.connectTimeoutMillis())).build();
+        this(config, HttpClient.newBuilder().connectTimeout(Duration.ofMillis(config.connectTimeoutMillis())).build(),
+            new RequestCache());
     }
 
-    public NewsApiClient(NewsApiConfig config, HttpClient httpClient) {
+    public NewsApiClient(NewsApiConfig config, HttpClient httpClient, RequestCache requestCache) {
         this.config = config;
         this.httpClient = httpClient;
+        this.requestCache = requestCache;
     }
 
     public NewsResponse getTopHeadlines(RequestBuilder builder) throws NewsApiException, TimeoutException {
         validateKeywords(builder.getKeywords());
         String fullUrl = buildUrl(builder);
 
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(fullUrl)).GET()
-            .timeout(Duration.ofMillis(config.readTimeoutMillis())).build();
+        Optional<String> cachedResponse = getCachedResponse(fullUrl);
+        if (cachedResponse.isPresent()) {
+            return parseCachedResponse(cachedResponse.get());
+        }
 
+        return fetchAndCacheResponse(fullUrl);
+    }
+
+    private Optional<String> getCachedResponse(String fullUrl) {
+        return requestCache.getCachedResponse(fullUrl);
+    }
+
+    private NewsResponse parseCachedResponse(String cachedResponse) throws NewsApiException {
+        try {
+            return objectMapper.readValue(cachedResponse, NewsResponse.class);
+        } catch (IOException e) {
+            throw new NewsApiException("Error parsing cached response", e);
+        }
+    }
+
+    private NewsResponse fetchAndCacheResponse(String fullUrl) throws NewsApiException, TimeoutException {
+        HttpRequest request = createHttpRequest(fullUrl);
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            int responseCode = response.statusCode();
-
-            if (isSuccess(responseCode)) {
-                return objectMapper.readValue(response.body(), NewsResponse.class);
-            } else {
-                handleErrorResponse(responseCode, response.body());
-            }
+            return processHttpResponse(fullUrl, response);
         } catch (HttpTimeoutException e) {
             throw new TimeoutException("Request timed out");
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new NewsApiException("Error connecting to News API", e);
         }
+    }
+
+    private HttpRequest createHttpRequest(String fullUrl) {
+        return HttpRequest.newBuilder().uri(URI.create(fullUrl)).GET()
+            .timeout(Duration.ofMillis(config.readTimeoutMillis())).build();
+    }
+
+    private NewsResponse processHttpResponse(String fullUrl, HttpResponse<String> response) throws NewsApiException {
+        int responseCode = response.statusCode();
+
+        if (isSuccess(responseCode)) {
+            cacheResponse(fullUrl, response.body());
+            return parseHttpResponse(response.body());
+        } else {
+            handleErrorResponse(responseCode, response.body());
+        }
 
         throw new NewsApiException("Unhandled case occurred while processing the API response.");
+    }
+
+    private NewsResponse parseHttpResponse(String responseBody) throws NewsApiException {
+        try {
+            return objectMapper.readValue(responseBody, NewsResponse.class);
+        } catch (IOException e) {
+            throw new NewsApiException("Error parsing API response", e);
+        }
+    }
+
+    private void cacheResponse(String fullUrl, String responseBody) {
+        requestCache.cacheResponse(fullUrl, responseBody);
     }
 
     private void validateKeywords(String keywords) {
